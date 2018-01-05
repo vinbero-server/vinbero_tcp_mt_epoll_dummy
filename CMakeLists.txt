@@ -1,0 +1,5 @@
+cmake_minimum_required(VERSION 3.8)
+project(tucube_tcp_mt_epoll_dummy)
+set(CMAKE_BUILD_TYPE Debug)
+add_subdirectory(src)
+add_subdirectory(test)
