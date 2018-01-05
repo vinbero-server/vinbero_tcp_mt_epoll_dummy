@@ -11,10 +11,10 @@
 #include <tucube/tucube_ICLocal.h>
 #include <tucube/tucube_IClService.h>
 #include <libgenc/genc_Tree.h>
+#include <gaio.h>
 
-struct tucube_dummy_LocalModule {
-    const char* message;
-    int interval;
+struct tucube_tcp_mt_epoll_dummy_ClData {
+    int* clientSocket;
 };
 
 TUCUBE_ITLOCAL_FUNCTIONS;
@@ -25,11 +25,6 @@ int tucube_IModule_init(struct tucube_Module* module, struct tucube_Config* conf
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
     module->name = "tucube_tcp_mt_epoll_dummy";
     module->version = "0.0.1";
-    module->localModule.pointer = malloc(1 * sizeof(struct tucube_dummy_LocalModule));
-
-    struct tucube_dummy_LocalModule* localModule = module->localModule.pointer;
-    TUCUBE_CONFIG_GET(config, module, "tucube_dummy.message", string, &(localModule->message), "I HAVE NOTHING TO SAY");
-    TUCUBE_CONFIG_GET(config, module, "tucube_dummy.interval", integer, &(localModule->interval), 1);
 
     struct tucube_Module_Ids childModuleIds;
     GENC_ARRAY_LIST_INIT(&childModuleIds);
@@ -54,11 +49,16 @@ warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
 
 int tucube_ICLocal_init(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+    clData->generic.pointer = args[0];
     return 0;
 }
 
 int tucube_IClService_call(struct tucube_Module* module, struct tucube_ClData* clData, void* args[]) {
 warnx("%s: %u: %s", __FILE__, __LINE__, __FUNCTION__);
+
+    struct gaio_Io* clientIo = clData->generic.pointer;
+    clientIo->methods->write(clientIo, "HTTP/1.1 200 OK\r\nContent-Length:5\r\n\r\nHELLO", sizeof("HTTP/1.1 200 OK\r\nContent-Length:5\r\n\r\nHELLO") - 1);
+
     return 0;
 }
 
